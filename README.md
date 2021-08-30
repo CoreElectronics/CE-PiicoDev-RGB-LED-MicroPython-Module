@@ -18,6 +18,6 @@ This project is open source - please review the LICENSE.md file for further lice
 If you have any technical questions, or concerns about licensing, please contact technical support on the [Core Electronics forums](https://forum.core-electronics.com.au/).
 
 # Attribution
-This project is based off the [Qwiic Switch](https://github.com/sparkfunX/Qwiic_Switch) project by Sparkfun. It makes use of the register structure and i2c device drivers.
+C++ code firmware project is based off the [Qwiic Switch](https://github.com/sparkfunX/Qwiic_Switch) project by Sparkfun. It makes use of the register structure and i2c device drivers.
 
 *\"PiicoDev\" and the PiicoDev logo are trademarks of Core Electronics Pty Ltd.*
