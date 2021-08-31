@@ -1,7 +1,7 @@
 from PiicoDev_Unified import *
 from time import sleep
 i2c=PiicoDev_Unified_I2C()
-_baseAddr=0x10
+_baseAddr=0x08
 _DevID=0x84
 _regDevID=0x00
 _regFirmVer=0x01

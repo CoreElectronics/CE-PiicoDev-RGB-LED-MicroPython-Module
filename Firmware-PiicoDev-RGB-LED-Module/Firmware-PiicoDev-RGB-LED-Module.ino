@@ -23,7 +23,7 @@
 #define FIRMWARE_MINOR 0x00
 
 #define DEVICE_ID 0x84
-#define DEFAULT_I2C_ADDRESS 0x10
+#define DEFAULT_I2C_ADDRESS 0x08
 
 #define SOFTWARE_ADDRESS true
 #define HARDWARE_ADDRESS false
