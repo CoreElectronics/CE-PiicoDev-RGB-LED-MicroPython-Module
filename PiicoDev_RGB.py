@@ -9,7 +9,7 @@ _regCtrl=0x03
 _regI2cAddr=0x04
 _regBright=0x05
 _regLedVals=0x06
-class PiicoDev_GlowBit(object):
+class PiicoDev_RGB(object):
     def setPixelColor(self,n,r,g,b):
         self.led[n]=[r,g,b]
     def show(self):

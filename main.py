@@ -3,12 +3,12 @@ from math import sin, pi
 from PiicoDev_Unified import *
 i2c = PiicoDev_Unified_I2C()
 
-from PiicoDev_GlowBit import PiicoDev_GlowBit
+from PiicoDev_RGB import PiicoDev_RGB
 
 i = 0
 
 
-leds = PiicoDev_GlowBit()
+leds = PiicoDev_RGB()
 # leds.setI2Caddr(0x55)
 leds.clear()
 
