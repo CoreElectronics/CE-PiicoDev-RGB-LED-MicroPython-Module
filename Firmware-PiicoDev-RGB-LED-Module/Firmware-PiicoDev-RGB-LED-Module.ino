@@ -23,8 +23,7 @@
 #define FIRMWARE_MINOR 0x00
 
 #define DEVICE_ID 0x84
-#define DEFAULT_I2C_ADDRESS 0x08
-
+#define DEFAULT_I2C_ADDRESS 0x55
 #define SOFTWARE_ADDRESS true
 #define HARDWARE_ADDRESS false
 uint8_t oldAddress;
@@ -33,10 +32,11 @@ uint8_t oldAddress;
 #if defined(__AVR_ATtiny806__)
 const uint8_t powerLedPin = PIN_PC2;
 const uint16_t glowbitPin = PIN_PA1;
+
 const uint8_t addressPin1 = PIN_PA7;
 const uint8_t addressPin2 = PIN_PB5;
-const uint8_t addressPin3 = PIN_PB2;
-const uint8_t addressPin4 = PIN_PA5;
+const uint8_t addressPin3 = PIN_PA5;
+const uint8_t addressPin4 = PIN_PB2;
 #endif
 
 const int NUMLEDS = 3;
@@ -120,6 +120,7 @@ void loop() {
   {
     oldAddress = registerMap.i2cAddress;
     EEPROM.put(LOCATION_ADDRESS_TYPE, SOFTWARE_ADDRESS);
+    startI2C(&registerMap);
   }
 
   if (updateFlag) {
@@ -179,6 +180,15 @@ void startI2C(memoryMap *map)
   //If any of the address jumpers are set, we use jumpers
   if ((IOaddress != DEFAULT_I2C_ADDRESS) || (addressType == HARDWARE_ADDRESS))
   {
+    // TODO remove debug
+    leds.setPixelColor(0, 50,0,0 );
+    leds.setPixelColor(1, 50,0,0 );
+    leds.setPixelColor(2, 50,0,0 );
+    leds.show();
+    delay(500);
+    //
+
+    
     address = IOaddress;
     EEPROM.put(LOCATION_ADDRESS_TYPE, HARDWARE_ADDRESS);
   }
@@ -211,7 +221,7 @@ void startI2C(memoryMap *map)
 void powerLed(bool enable){
   if (enable) {
     pinMode(powerLedPin, OUTPUT);
-    digitalWrite(powerLedPin, LOW);
+    digitalWrite(powerLedPin, HIGH);
   } else {
     pinMode(powerLedPin, INPUT);
   }
