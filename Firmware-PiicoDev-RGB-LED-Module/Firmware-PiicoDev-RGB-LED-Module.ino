@@ -1,14 +1,7 @@
 // Wire I2C Receiver
 
-// TODO: Hardware
-//  - WARNING: LED comes on when Switch:2 is closed. What's up with that?
-//  - No need for a factory reset jumper - selecting a hardware address has the action of resetting the address
-//    eg. Software address was set. to reset, set a jumper, and power cycle
-//
-//  - Consider connecting power LED to a GPIO. Always powers on, but can be turned off by command
 
 //#define DEBUG
-
 #define F_CPU 8000000
 #include <Wire.h>
 #include <EEPROM.h>
@@ -23,7 +16,7 @@
 #define FIRMWARE_MINOR 0x00
 
 #define DEVICE_ID 0x84
-#define DEFAULT_I2C_ADDRESS 0x55
+#define DEFAULT_I2C_ADDRESS 0x20 // Works best if second digit is always zero - so address jumpers may set incrementing address always
 #define SOFTWARE_ADDRESS true
 #define HARDWARE_ADDRESS false
 uint8_t oldAddress;
@@ -56,10 +49,10 @@ volatile memoryMap registerMap {
   DEVICE_ID,            //id
   FIRMWARE_MINOR,       //firmwareMinor
   FIRMWARE_MAJOR,       //firmwareMajor
-  {0,1},                //Control register {clearLedFlag, pwrLedCtl}
+  {0, 1},               //Control register {clearLedFlag, pwrLedCtl}
   DEFAULT_I2C_ADDRESS,  //i2cAddress
   255,                  //ledBrightness
-  {0,0,0,0,0,0,0,0,0}   //ledValues
+  {0, 0, 0, 0, 0, 0, 0, 0, 0} //ledValues
 };
 
 // Define which registers are user-modifiable. (0 = protected, 1 = modifiable)
@@ -67,10 +60,10 @@ volatile memoryMap protectionMap {
   0x00,                                             //id
   0x00,                                             //firmwareMinor
   0x00,                                             //firmwareMajor
-  {1,1},                                            //control
+  {1, 1},                                           //control
   0xFF,                                             //i2cAddress
   0xFF,                                             //ledBrightness
-  {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF}    //ledValues
+  {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF} //ledValues
 };
 
 
@@ -92,17 +85,17 @@ void setup() {
 
   pinMode(glowbitPin, OUTPUT);
 #ifdef DEBUG
-  leds.setPixelColor(0,255,0,0); // first LED full RED
+  leds.setPixelColor(0, 255, 0, 0); // first LED full RED
   leds.show();                   // LED turns on.
   delay(1000);
 #endif
 
-// squash spurious WS2812 LED power-on behaviour
-delay(1);leds.clear();leds.show();
+  // squash spurious WS2812 LED power-on behaviour
+  delay(1); leds.clear(); leds.show();
 
-//  Serial.pins(PIN_PA1, PIN_PA2);  // For Xplained Nano breakout
-//  Serial.begin(9600);             // For Xplained Nano breakout
-//  Serial.println("Begin");
+  //  Serial.pins(PIN_PA1, PIN_PA2);  // For Xplained Nano breakout
+  //  Serial.begin(9600);             // For Xplained Nano breakout
+  //  Serial.println("Begin");
 
 
   set_sleep_mode(SLEEP_MODE_IDLE);
@@ -126,14 +119,14 @@ void loop() {
   if (updateFlag) {
     // Clear LEDs
     if (registerMap.control.clearLedFlag == true) {
-//      Serial.println(registerMap.control.clearLedFlag);
-      leds.clear(); leds.show();
       registerMap.control.clearLedFlag = false;
+      memset(registerMap.ledValues, 0, sizeof(registerMap.ledValues) ); // dump all led values
+      leds.clear(); leds.show();
     }
 
     // Power LED - open drain so toggle between output-low and high-impedance input
     static bool lastPowerLed = true;
-    if (registerMap.control.pwrLedCtl != lastPowerLed){
+    if (registerMap.control.pwrLedCtl != lastPowerLed) {
       lastPowerLed = registerMap.control.pwrLedCtl;
       powerLed(registerMap.control.pwrLedCtl);
     }
@@ -145,6 +138,7 @@ void loop() {
     }
 
     // write buffer data to each LED
+    // LEDs are updated on every updateFlag - it's implicit that this is the most used function so... why not?
     leds.setPixelColor(0, registerMap.ledValues[0], registerMap.ledValues[1], registerMap.ledValues[2] );
     leds.setPixelColor(1, registerMap.ledValues[3], registerMap.ledValues[4], registerMap.ledValues[5] );
     leds.setPixelColor(2, registerMap.ledValues[6], registerMap.ledValues[7], registerMap.ledValues[8] );
@@ -159,7 +153,7 @@ void loop() {
   sleep_mode();
 }
 
-//Update slave I2C address to what's configured with registerMap.i2cAddress and/or the address jumpers.
+//Update own I2C address to what's configured with registerMap.i2cAddress and/or the address jumpers.
 void startI2C(memoryMap *map)
 {
   uint8_t address;
@@ -171,24 +165,18 @@ void startI2C(memoryMap *map)
     EEPROM.put(LOCATION_ADDRESS_TYPE, SOFTWARE_ADDRESS);
   }
 
+  // Add hardware address jumper values to the default address
   uint8_t IOaddress = DEFAULT_I2C_ADDRESS;
-  bitWrite(IOaddress, 0, !digitalRead(addressPin1));
-  bitWrite(IOaddress, 1, !digitalRead(addressPin2));
-  bitWrite(IOaddress, 2, !digitalRead(addressPin3));
-  bitWrite(IOaddress, 3, !digitalRead(addressPin4));
-
+  uint8_t switchPositions = 0; 
+  bitWrite(switchPositions, 0, !digitalRead(addressPin1));
+  bitWrite(switchPositions, 1, !digitalRead(addressPin2));
+  bitWrite(switchPositions, 2, !digitalRead(addressPin3));
+  bitWrite(switchPositions, 3, !digitalRead(addressPin4));
+  IOaddress += switchPositions;
+  
   //If any of the address jumpers are set, we use jumpers
   if ((IOaddress != DEFAULT_I2C_ADDRESS) || (addressType == HARDWARE_ADDRESS))
   {
-    // TODO remove debug
-    leds.setPixelColor(0, 50,0,0 );
-    leds.setPixelColor(1, 50,0,0 );
-    leds.setPixelColor(2, 50,0,0 );
-    leds.show();
-    delay(500);
-    //
-
-    
     address = IOaddress;
     EEPROM.put(LOCATION_ADDRESS_TYPE, HARDWARE_ADDRESS);
   }
@@ -218,7 +206,7 @@ void startI2C(memoryMap *map)
 
 
 // Control the power LED - open drain output so toggle between enable (output, low) and disable (high-impedance input)
-void powerLed(bool enable){
+void powerLed(bool enable) {
   if (enable) {
     pinMode(powerLedPin, OUTPUT);
     digitalWrite(powerLedPin, HIGH);
