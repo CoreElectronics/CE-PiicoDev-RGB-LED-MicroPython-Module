@@ -1,25 +1,37 @@
 from time import sleep
 from math import sin, pi
-from PiicoDev_Unified import *
-i2c = PiicoDev_Unified_I2C()
+# from PiicoDev_Unified import *
+# i2c = PiicoDev_Unified_I2C()
 
 from PiicoDev_RGB import PiicoDev_RGB, hsv_to_rgb
 
 i = 0
 
 
-leds = PiicoDev_RGB(0x20)
+leds = PiicoDev_RGB()
 # leds.setI2Caddr(0x55)
 leds.clear()
 sleep(0.1)
 
 leds.setBrightness(20)
+print("ID: ",leds.readID())
+print("ver. ",leds.readFirmware())
 
+i = 0 # loop counter
+x = 1 # LED state
 while True:
     c = hsv_to_rgb(i/360)
     leds.fill(c)
     i = i + 1
     i = i%360
+    
+    i = i+1
+    if i % 100 == 0:
+        leds.pwrLED(x)
+        if x == 1:
+            x = 0
+        else:
+            x = 1
     sleep(0.005)
     
     

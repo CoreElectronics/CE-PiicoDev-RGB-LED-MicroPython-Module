@@ -1,6 +1,5 @@
 from PiicoDev_Unified import *
-i2c=PiicoDev_Unified_I2C()
-_baseAddr=0x20
+_baseAddr=0x08
 _DevID=0x84
 _regDevID=0x00
 _regFirmVer=0x01
@@ -25,7 +24,7 @@ class PiicoDev_RGB(object):
         self.led[n]=[r,g,b]
     def show(self):
         buffer = bytes(self.led[0]) + bytes(self.led[1]) + bytes(self.led[2])
-        i2c.writeto_mem(self.addr, _regLedVals, buffer)
+        self.i2c.writeto_mem(self.addr, _regLedVals, buffer)
     def setBrightness(self,x):
         self.bright=x
         self.i2c.writeto_mem(self.addr, _regBright, bytes([self.bright]))
@@ -63,13 +62,15 @@ class PiicoDev_RGB(object):
         for i in range(len(self.led)):
             self.led[i]=c
         self.show()
-    def __init__(self, addr=_baseAddr, i2c=i2c, bright=50):
-        self.i2c = i2c
+        
+    def __init__(self, bus=None, freq=None, sda=None, scl=None, addr=_baseAddr, bright=50):
+        self.i2c = create_unified_i2c(bus=bus, freq=freq, sda=sda, scl=scl)
+        print("pass")
         a=addr
-        if type(a) is list:
+        if type(a) is list: # to accept DIP switch-positions eg [0,0,0,1]
             self.addr=_baseAddr+a[0]+2*a[1]+4*a[2]+8*a[3]
         else:
-            self.addr = a            
+            self.addr = a # accept an integer
         self.led = [[0,0,0],[0,0,0],[0,0,0]]
         self.bright=bright
         try:
