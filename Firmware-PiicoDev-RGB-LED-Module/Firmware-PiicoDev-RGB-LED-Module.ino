@@ -16,7 +16,7 @@
 #define FIRMWARE_MINOR 0x00
 
 #define DEVICE_ID 0x84
-#define DEFAULT_I2C_ADDRESS 0x20 // Works best if second digit is always zero - so address jumpers may set incrementing address always
+#define DEFAULT_I2C_ADDRESS 0x08 // Works best if second digit is always zero - so address jumpers may set incrementing address always
 #define SOFTWARE_ADDRESS true
 #define HARDWARE_ADDRESS false
 uint8_t oldAddress;
