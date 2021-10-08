@@ -19,13 +19,11 @@ def hsv_to_rgb(h,s=1,v=1):
 	if i==4:return[t,p,v]
 	if i==5:return[v,p,q]
 class PiicoDev_RGB:
-	def setPixelColor(self,n,r,g,b):self.led[n]=[r,g,b]
+	def setPixel(self,n,r,g,b):self.led[n]=[round(r),round(g),round(b)]
 	def show(self):buffer=bytes(self.led[0])+bytes(self.led[1])+bytes(self.led[2]);self.i2c.writeto_mem(self.addr,_regLedVals,buffer)
-	def setBrightness(self,x):self.bright=x;self.i2c.writeto_mem(self.addr,_regBright,bytes([self.bright]));sleep_ms(1)
+	def setBrightness(self,x):self.bright=x if 0<=x<=255 else 255;self.i2c.writeto_mem(self.addr,_regBright,bytes([self.bright]));sleep_ms(1)
 	def clear(self):d=self.i2c.readfrom_mem(self.addr,_regCtrl,1);r=int.from_bytes(d,'big');sleep_ms(1);r|=1<<0;self.i2c.writeto_mem(self.addr,_regCtrl,bytes([r]));sleep_ms(1)
-	def setI2Caddr(self,newAddr):
-		if newAddr>=8 and newAddr<=119:self.i2c.writeto_mem(self.addr,_regI2cAddr,bytes([newAddr]));self.addr=newAddr;sleep_ms(5)
-		else:print('address must be >=0x08 and <=0x77')
+	def setI2Caddr(self,newAddr):x=int(newAddr);assert 8<=x<=119,'address must be >=0x08 and <=0x77';self.i2c.writeto_mem(self.addr,_regI2cAddr,bytes([x]));self.addr=x;sleep_ms(5)
 	def readFirmware(self):v=self.i2c.readfrom_mem(self.addr,_regFirmVer,2);return v[1],v[0]
 	def readID(self):return self.i2c.readfrom_mem(self.addr,_regDevID,1)[0]
 	def pwrLED(self,bit):
