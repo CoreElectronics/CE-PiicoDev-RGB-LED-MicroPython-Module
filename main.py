@@ -1,22 +1,19 @@
-from time import sleep
 from math import sin, pi
-# from PiicoDev_Unified import *
-# i2c = PiicoDev_Unified_I2C()
-
 from PiicoDev_RGB import PiicoDev_RGB, hsv_to_rgb
+from PiicoDev_Unified import sleep_ms # Cross-platform compatible sleep function
 
-i = 0
+leds = PiicoDev_RGB(addr=0x77) # initialise the LED module
+leds.setBrightness(20) # set the global brightness
 
-
-leds = PiicoDev_RGB()
-# leds.setI2Caddr(0x55)
-leds.clear()
-sleep(0.1)
-
-leds.setBrightness(20)
 print("ID: ",leds.readID())
 print("ver. ",leds.readFirmware())
 
+
+leds.setI2Caddr(0x08)
+leds.setPixel(0,20.5,100,255)
+leds.show()
+while True:
+    sleep_ms(1)
 i = 0 # loop counter
 x = 1 # LED state
 while True:
@@ -32,7 +29,7 @@ while True:
             x = 0
         else:
             x = 1
-    sleep(0.005)
+    sleep_ms(5)
     
     
 #     leds.fill([255,0,0]); leds.show()

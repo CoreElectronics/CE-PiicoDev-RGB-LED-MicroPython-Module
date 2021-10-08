@@ -10,7 +10,7 @@ _regLedVals=0x06
 
 def hsv_to_rgb(h, s=1, v=1):
     if s == 0.0: v*=255; return (v, v, v)
-    i = int(h*6.) # XXX assume int() truncates!
+    i = int(h*6.) # assume int() truncates
     f = (h*6.)-i; p,q,t = int(255*(v*(1.-s))), int(255*(v*(1.-s*f))), int(255*(v*(1.-s*(1.-f)))); v*=255; i%=6
     if i == 0: return [v, t, p]
     if i == 1: return [q, v, p]
@@ -20,15 +20,18 @@ def hsv_to_rgb(h, s=1, v=1):
     if i == 5: return [v, p, q]
 
 class PiicoDev_RGB(object):
-    def setPixelColor(self,n,r,g,b):
-        self.led[n]=[r,g,b]
+    def setPixel(self,n,r,g,b):
+        self.led[n]=[round(r),round(g),round(b)]
+
     def show(self):
         buffer = bytes(self.led[0]) + bytes(self.led[1]) + bytes(self.led[2])
         self.i2c.writeto_mem(self.addr, _regLedVals, buffer)
+
     def setBrightness(self,x):
-        self.bright=x
+        self.bright= x if 0 <= x <= 255 else 255
         self.i2c.writeto_mem(self.addr, _regBright, bytes([self.bright]))
         sleep_ms(1)
+
     def clear(self):
         d=self.i2c.readfrom_mem(self.addr, _regCtrl, 1)
         r=int.from_bytes(d,'big')
@@ -36,18 +39,22 @@ class PiicoDev_RGB(object):
         r|=(1<<0) # zero-th bit is the clear flag
         self.i2c.writeto_mem(self.addr,_regCtrl,bytes([r]))
         sleep_ms(1)
+
     def setI2Caddr(self, newAddr):
-        if newAddr >= 0x08 and newAddr <= 0x77: #check valid address
-            self.i2c.writeto_mem(self.addr, _regI2cAddr, bytes([newAddr]))
-            self.addr = newAddr
-            sleep_ms(5)
-        else:
-            print('address must be >=0x08 and <=0x77')
+        x=int(newAddr)
+        assert 8 <= x <= 0x77, 'address must be >=0x08 and <=0x77'
+        self.i2c.writeto_mem(self.addr, _regI2cAddr, bytes([x]))
+        self.addr = x
+        sleep_ms(5)
+
     def readFirmware(self):
         v=self.i2c.readfrom_mem(self.addr, _regFirmVer, 2)
         return (v[1],v[0])
+
     def readID(self):
         return self.i2c.readfrom_mem(self.addr, _regDevID, 1)[0]
+
+    # Control the 'Power' LED. Defaults ON if anything else but False is passed in
     def pwrLED(self,bit):
         d=self.i2c.readfrom_mem(self.addr, _regCtrl, 1)
         d=int.from_bytes(d,'big')
