@@ -21,8 +21,8 @@
 #define HARDWARE_ADDRESS false
 uint8_t oldAddress;
 
-// Hardware Connectins
-#if defined(__AVR_ATtiny806__)
+// Hardware Connections
+#if defined(__AVR_ATtiny806__) || defined(__AVR_ATtiny816__)
 const uint8_t powerLedPin = PIN_PC2;
 const uint16_t glowbitPin = PIN_PA1;
 
@@ -144,7 +144,7 @@ void loop() {
     leds.setPixelColor(2, registerMap.ledValues[6], registerMap.ledValues[7], registerMap.ledValues[8] );
     leds.show();
 
-    //Record anything new to EEPROM (like new LED values)
+    //Record anything new to EEPROM (like new i2c address)
     //It can take a handful of ms to write a byte to EEPROM so we do that here instead of in an interrupt
     recordSystemSettings(&registerMap);
     updateFlag = false;
@@ -167,13 +167,13 @@ void startI2C(memoryMap *map)
 
   // Add hardware address jumper values to the default address
   uint8_t IOaddress = DEFAULT_I2C_ADDRESS;
-  uint8_t switchPositions = 0; 
+  uint8_t switchPositions = 0;
   bitWrite(switchPositions, 0, !digitalRead(addressPin1));
   bitWrite(switchPositions, 1, !digitalRead(addressPin2));
   bitWrite(switchPositions, 2, !digitalRead(addressPin3));
   bitWrite(switchPositions, 3, !digitalRead(addressPin4));
   IOaddress += switchPositions;
-  
+
   //If any of the address jumpers are set, we use jumpers
   if ((IOaddress != DEFAULT_I2C_ADDRESS) || (addressType == HARDWARE_ADDRESS))
   {
