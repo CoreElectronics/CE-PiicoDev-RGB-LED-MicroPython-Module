@@ -1,68 +1,28 @@
-from math import sin, pi
-from PiicoDev_RGB import PiicoDev_RGB, hsv_to_rgb
+from PiicoDev_RGB import PiicoDev_RGB, wheel
 from PiicoDev_Unified import sleep_ms # Cross-platform compatible sleep function
 
-leds = PiicoDev_RGB(addr=0x77) # initialise the LED module
-leds.setBrightness(20) # set the global brightness
+leds = PiicoDev_RGB() # initialise the LED module with conservative default brightness
+# leds.setBrightness(127) # 0-255 set the global brightness to half
 
-print("ID: ",leds.readID())
-print("ver. ",leds.readFirmware())
-
-
-leds.setI2Caddr(0x08)
-leds.setPixel(0,20.5,100,255)
+# Set LED# to pure Red, Green, Blue
+leds.setPixel(0, 255,0,0) # 0: red
+leds.setPixel(1, 0,255,0) # 1: green
+leds.setPixel(2, 0,0,255) # 2: blue
 leds.show()
-while True:
-    sleep_ms(1)
+sleep_ms(2000)
+leds.clear() # clear the LEDs
+sleep_ms(1000)
+
 i = 0 # loop counter
-x = 1 # LED state
+powerLedState = True # LED state
+
 while True:
-    c = hsv_to_rgb(i/360)
-    leds.fill(c)
-    i = i + 1
-    i = i%360
+    c = wheel(i/360) # pick a colour from the colour wheel
+    leds.fill(c) # fill() will automatically show()
+    
+    if i % 100 == 0: # every 100 loops toggle the power LED
+        powerLedState = not powerLedState # toggle state variable
+        leds.pwrLED(powerLedState) # update power LED       
     
     i = i+1
-    if i % 100 == 0:
-        leds.pwrLED(x)
-        if x == 1:
-            x = 0
-        else:
-            x = 1
     sleep_ms(5)
-    
-    
-#     leds.fill([255,0,0]); leds.show()
-#     sleep(0.5)
-#     leds.fill([0,255,0])
-#     sleep(0.5)
-#     leds.fill([0,0,255])
-#     sleep(0.5)
-# Pulse three LEDs with three separate colours out of sync
-#     r = round( 255 * (0.5*sin(i) +0.5) )
-#     g = round( 255 * (0.5*sin((i + 2*pi/3)) +0.5) )
-#     b = round( 255 * (0.5*sin(i + 4*pi/3) +0.5) )
-# 
-# 
-#     leds.setPixelColor(0,r,0,0)
-#     leds.setPixelColor(1,0,g,0)
-#     leds.setPixelColor(2,0,0,b)
-#     leds.show()
-# 
-#     i = (i + 0.1)
-#     if i > 2*pi:
-#         i = 0
-#             
-#     sleep(0.01)
-
-
-#     leds.setPixelColor(0,20,0,0)
-#     leds.show()
-#     sleep(0.25)
-#     leds.clear()
-#     sleep(0.25)
-
-
-
-    
-    
