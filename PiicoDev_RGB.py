@@ -56,15 +56,10 @@ class PiicoDev_RGB(object):
 
     # Control the 'Power' LED. Defaults ON if anything else but False is passed in
     def pwrLED(self,bit):
-        d=self.i2c.readfrom_mem(self.addr, _regCtrl, 1)
-        d=int.from_bytes(d,'big')
-        sleep_ms(1)
-        if bit == False:
-            d&=~(1<<1) # 1th bit is the pwrLED
-        else:
-            d|=(1<<1)
+        d=2 if bit==1 else 0
         self.i2c.writeto_mem(self.addr,_regCtrl,bytes([d]))
         sleep_ms(1)
+        
     def fill(self,c):
         for i in range(len(self.led)):
             self.led[i]=c
@@ -72,7 +67,6 @@ class PiicoDev_RGB(object):
         
     def __init__(self, bus=None, freq=None, sda=None, scl=None, addr=_baseAddr, bright=50):
         self.i2c = create_unified_i2c(bus=bus, freq=freq, sda=sda, scl=scl)
-        print("pass")
         a=addr
         if type(a) is list: # to accept DIP switch-positions eg [0,0,0,1]
             self.addr=_baseAddr+a[0]+2*a[1]+4*a[2]+8*a[3]
@@ -81,8 +75,8 @@ class PiicoDev_RGB(object):
         self.led = [[0,0,0],[0,0,0],[0,0,0]]
         self.bright=bright
         try:
-            if self.readID() != _DevID:
-                print("* Incorrect device found at address {}".format(addr))
+#             if self.readID() != _DevID: # time out on RPi - device (firmware?) has long setup-for-read?
+#                 print("* Incorrect device found at address {}".format(addr))
             self.setBrightness(bright)
             self.show()
         except:
