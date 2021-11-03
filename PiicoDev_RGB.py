@@ -4,11 +4,12 @@ _DevID=0x84
 _regDevID=0x00
 _regFirmVer=0x01
 _regCtrl=0x03
-_regI2cAddr=0x04
-_regBright=0x05
-_regLedVals=0x06
+_regClear=0x04
+_regI2cAddr=0x05
+_regBright=0x06
+_regLedVals=0x07
 
-def hsv_to_rgb(h, s=1, v=1):
+def wheel(h, s=1, v=1):
     if s == 0.0: v*=255; return (v, v, v)
     i = int(h*6.) # assume int() truncates
     f = (h*6.)-i; p,q,t = int(255*(v*(1.-s))), int(255*(v*(1.-s*f))), int(255*(v*(1.-s*(1.-f)))); v*=255; i%=6
@@ -33,11 +34,8 @@ class PiicoDev_RGB(object):
         sleep_ms(1)
 
     def clear(self):
-        d=self.i2c.readfrom_mem(self.addr, _regCtrl, 1)
-        r=int.from_bytes(d,'big')
-        sleep_ms(1)
-        r|=(1<<0) # zero-th bit is the clear flag
-        self.i2c.writeto_mem(self.addr,_regCtrl,bytes([r]))
+        self.i2c.writeto_mem(self.addr,_regClear,b'\x01')
+        self.led=[[0,0,0],[0,0,0],[0,0,0]]
         sleep_ms(1)
 
     def setI2Caddr(self, newAddr):
@@ -55,9 +53,9 @@ class PiicoDev_RGB(object):
         return self.i2c.readfrom_mem(self.addr, _regDevID, 1)[0]
 
     # Control the 'Power' LED. Defaults ON if anything else but False is passed in
-    def pwrLED(self,bit):
-        d=2 if bit==1 else 0
-        self.i2c.writeto_mem(self.addr,_regCtrl,bytes([d]))
+    def pwrLED(self, state):
+        assert state == True or state == False, 'argument must be True/1 or False/0'
+        self.i2c.writeto_mem(self.addr,_regCtrl,bytes([state]))
         sleep_ms(1)
         
     def fill(self,c):
@@ -65,21 +63,19 @@ class PiicoDev_RGB(object):
             self.led[i]=c
         self.show()
         
-    def __init__(self, bus=None, freq=None, sda=None, scl=None, addr=_baseAddr, bright=50):
+    def __init__(self, bus=None, freq=None, sda=None, scl=None, addr=_baseAddr, id=None, bright=50):
         self.i2c = create_unified_i2c(bus=bus, freq=freq, sda=sda, scl=scl)
-        a=addr
-        if type(a) is list: # to accept DIP switch-positions eg [0,0,0,1]
-            self.addr=_baseAddr+a[0]+2*a[1]+4*a[2]+8*a[3]
+        if type(id) is list: # preference using the ID argument
+            self.addr=_baseAddr+id[0]+2*id[1]+4*id[2]+8*id[3]
         else:
-            self.addr = a # accept an integer
+            self.addr = addr # accept an integer
         self.led = [[0,0,0],[0,0,0],[0,0,0]]
         self.bright=bright
         try:
-#             if self.readID() != _DevID: # time out on RPi - device (firmware?) has long setup-for-read?
-#                 print("* Incorrect device found at address {}".format(addr))
             self.setBrightness(bright)
             self.show()
-        except:
+        except Exception as e:
             print("* Couldn't find a device - check switches and wiring")
+            raise e
         
         

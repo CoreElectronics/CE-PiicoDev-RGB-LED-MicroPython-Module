@@ -49,7 +49,8 @@ volatile memoryMap registerMap {
   DEVICE_ID,            //id
   FIRMWARE_MINOR,       //firmwareMinor
   FIRMWARE_MAJOR,       //firmwareMajor
-  {0, 1},               //Control register {clearLedFlag, pwrLedCtl}
+  0x01,                  //power LED state
+  0x00,                  //clear-rgb-leds command
   DEFAULT_I2C_ADDRESS,  //i2cAddress
   255,                  //ledBrightness
   {0, 0, 0, 0, 0, 0, 0, 0, 0} //ledValues
@@ -60,7 +61,8 @@ volatile memoryMap protectionMap {
   0x00,                                             //id
   0x00,                                             //firmwareMinor
   0x00,                                             //firmwareMajor
-  {1, 1},                                           //control
+  0xFF,
+  0xFF,
   0xFF,                                             //i2cAddress
   0xFF,                                             //ledBrightness
   {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF} //ledValues
@@ -118,17 +120,17 @@ void loop() {
 
   if (updateFlag) {
     // Clear LEDs
-    if (registerMap.control.clearLedFlag == true) {
-      registerMap.control.clearLedFlag = false;
+    if (registerMap.clearLeds == 1) {
+      registerMap.clearLeds = 0;
       memset(registerMap.ledValues, 0, sizeof(registerMap.ledValues) ); // dump all led values
       leds.clear(); leds.show();
     }
 
     // Power LED - open drain so toggle between output-low and high-impedance input
     static bool lastPowerLed = true;
-    if (registerMap.control.pwrLedCtl != lastPowerLed) {
-      lastPowerLed = registerMap.control.pwrLedCtl;
-      powerLed(registerMap.control.pwrLedCtl);
+    if (registerMap.pwrLedCtrl != lastPowerLed) {
+      lastPowerLed = registerMap.pwrLedCtrl;
+      powerLed(registerMap.pwrLedCtrl);
     }
 
     // GlowBit brightness

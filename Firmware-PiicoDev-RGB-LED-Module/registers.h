@@ -19,15 +19,6 @@
 
   Distributed as-is; no warranty is given.
 ******************************************************************************/
-typedef union {
-  struct {
-    bool clearLedFlag : 1; // This is bit 0. User mutable, set to 1 will clear all leds (for the .clear() command)
-    bool pwrLedCtl : 1;    // Enable (1) or Disable (0) the Power LED
-    bool : 6;              // pad the remaining bits to next whole byte
-  };
-  uint8_t wrapperByte;
-} controlRegisterBitField;
-
 
 typedef struct memoryMap {
   //Device status/configuration               Register Address
@@ -35,15 +26,16 @@ typedef struct memoryMap {
   uint8_t firmwareMinor;                    // 0x01
   uint8_t firmwareMajor;                    // 0x02
 
-  // Control register. Use to issue commands. So far only bit0 is used: set bit0 to clear all LEDs
-  controlRegisterBitField control;          // 0x03
-
+  // Control register. Use to issue commands to power LED or to clear RGB LEDs
+  uint8_t pwrLedCtrl;                       // 0x03
+  uint8_t clearLeds;                        // 0x04
+  
   //Device Configuration
-  uint8_t i2cAddress;                       // 0x04
+  uint8_t i2cAddress;                       // 0x05
 
   //LED Configuration
-  uint8_t ledBrightness;                    // 0x05
-  uint8_t ledValues[9];                     // 0x06
+  uint8_t ledBrightness;                    // 0x06
+  uint8_t ledValues[9];                     // 0x07
 };
 // ledValues is the last entry in the register map - if more LEDs are desired
 // the register map can simply expand to accommodate
