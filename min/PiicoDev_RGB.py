@@ -26,20 +26,14 @@ class PiicoDev_RGB:
 	def setI2Caddr(self,newAddr):x=int(newAddr);assert 8<=x<=119,'address must be >=0x08 and <=0x77';self.i2c.writeto_mem(self.addr,_regI2cAddr,bytes([x]));self.addr=x;sleep_ms(5)
 	def readFirmware(self):v=self.i2c.readfrom_mem(self.addr,_regFirmVer,2);return v[1],v[0]
 	def readID(self):return self.i2c.readfrom_mem(self.addr,_regDevID,1)[0]
-	def pwrLED(self,bit):
-		d=self.i2c.readfrom_mem(self.addr,_regCtrl,1);d=int.from_bytes(d,'big');sleep_ms(1)
-		if bit==False:d&=~(1<<1)
-		else:d|=1<<1
-		self.i2c.writeto_mem(self.addr,_regCtrl,bytes([d]));sleep_ms(1)
+	def pwrLED(self,bit):d=2 if bit==1 else 0;self.i2c.writeto_mem(self.addr,_regCtrl,bytes([d]));sleep_ms(1)
 	def fill(self,c):
 		for i in range(len(self.led)):self.led[i]=c
 		self.show()
 	def __init__(self,bus=_A,freq=_A,sda=_A,scl=_A,addr=_baseAddr,bright=50):
-		self.i2c=create_unified_i2c(bus=bus,freq=freq,sda=sda,scl=scl);print('pass');a=addr
+		self.i2c=create_unified_i2c(bus=bus,freq=freq,sda=sda,scl=scl);a=addr
 		if type(a)is list:self.addr=_baseAddr+a[0]+2*a[1]+4*a[2]+8*a[3]
 		else:self.addr=a
 		self.led=[[0,0,0],[0,0,0],[0,0,0]];self.bright=bright
-		try:
-			if self.readID()!=_DevID:print('* Incorrect device found at address {}'.format(addr))
-			self.setBrightness(bright);self.show()
+		try:self.setBrightness(bright);self.show()
 		except:print("* Couldn't find a device - check switches and wiring")
