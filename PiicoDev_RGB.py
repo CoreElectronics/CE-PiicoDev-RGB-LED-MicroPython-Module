@@ -66,6 +66,7 @@ class PiicoDev_RGB(object):
     def __init__(self, bus=None, freq=None, sda=None, scl=None, addr=_baseAddr, id=None, bright=50):
         self.i2c = create_unified_i2c(bus=bus, freq=freq, sda=sda, scl=scl)
         if type(id) is list: # preference using the ID argument
+            assert max(id) <= 1 and min(id) >= 0 and len(id) is 4, "id must be a list of 1/0, length=4"
             self.addr=_baseAddr+id[0]+2*id[1]+4*id[2]+8*id[3]
         else:
             self.addr = addr # accept an integer
