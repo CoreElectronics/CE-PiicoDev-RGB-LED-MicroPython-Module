@@ -33,7 +33,7 @@ class PiicoDev_RGB:
 		self.show()
 	def __init__(self,bus=_A,freq=_A,sda=_A,scl=_A,addr=_baseAddr,id=_A,bright=50):
 		self.i2c=create_unified_i2c(bus=bus,freq=freq,sda=sda,scl=scl)
-		if type(id)is list:self.addr=_baseAddr+id[0]+2*id[1]+4*id[2]+8*id[3]
+		if type(id)is list:assert max(id)<=1 and min(id)>=0 and len(id)is 4,'id must be a list of 1/0, length=4';self.addr=_baseAddr+id[0]+2*id[1]+4*id[2]+8*id[3]
 		else:self.addr=addr
 		self.led=[[0,0,0],[0,0,0],[0,0,0]];self.bright=bright
 		try:self.setBrightness(bright);self.show()
