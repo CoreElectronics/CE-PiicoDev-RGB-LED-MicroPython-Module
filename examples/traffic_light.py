@@ -1,41 +1,33 @@
 from PiicoDev_RGB import PiicoDev_RGB
 from PiicoDev_Unified import sleep_ms # Cross-platform compatible sleep function
 
-traffic1 = PiicoDev_RGB() # initialise an RGB LED module with default address (all switches OFF)
-traffic2 = PiicoDev_RGB(id=[1,0,0,0]) # initialise RGB LED module using switch positions (first switch ON, all others OFF)
+trafficA = PiicoDev_RGB() # initialise an RGB LED module with default address (all switches OFF)
+trafficB = PiicoDev_RGB(id=[1,0,0,0]) # initialise RGB LED module using switch positions (first switch ON, all others OFF)
 
-# These functions set the corresponding RGB LED module to  a given colour
-def Red(module):
-    module.clear();
-    module.setPixel(0,255,0,0) # top light red
-    module.show()
-    
-def Amber(module):
-    module.clear();
-    module.setPixel(1,255,165,0) # middle light amber
-    module.show()
-    
-def Green(module):
-    module.clear();
-    module.setPixel(2,0,255,0) # bottom light green
-    module.show()
+red = [255,0,0]
+amber = [225,165,0]
+green = [0,255,0]
 
 while True:
     ### Traffic flows one way
-    Green(traffic1) 
-    Red(traffic2)
+    trafficA.clear(); trafficB.clear()
+    trafficA.setPixel(2, green); trafficA.show()
+    trafficB.setPixel(0, red); trafficB.show()
     sleep_ms(2000)
     
     ### Transition
-    Amber(traffic1)
+    trafficA.clear();
+    trafficA.setPixel(1, amber); trafficA.show()
     sleep_ms(1000)
     
     ### Traffic flows the other way
-    Red(traffic1)
-    Green(traffic2)
+    trafficA.clear(); trafficB.clear()
+    trafficA.setPixel(0, red); trafficA.show()
+    trafficB.setPixel(2, green); trafficB.show()
     sleep_ms(2000)
     
     ### Transition
-    Amber(traffic2)
+    trafficB.clear();
+    trafficB.setPixel(1, amber); trafficB.show()
     sleep_ms(1000)
     
