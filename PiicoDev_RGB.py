@@ -21,8 +21,8 @@ def wheel(h, s=1, v=1):
     if i == 5: return [v, p, q]
 
 class PiicoDev_RGB(object):
-    def setPixel(self,n,r,g,b):
-        self.led[n]=[round(r),round(g),round(b)]
+    def setPixel(self,n,c):
+        self.led[n]=[round(c[0]),round(c[1]),round(c[2])]
 
     def show(self):
         buffer = bytes(self.led[0]) + bytes(self.led[1]) + bytes(self.led[2])
