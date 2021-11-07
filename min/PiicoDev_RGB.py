@@ -20,7 +20,7 @@ def wheel(h,s=1,v=1):
 	if i==4:return[t,p,v]
 	if i==5:return[v,p,q]
 class PiicoDev_RGB:
-	def setPixel(self,n,r,g,b):self.led[n]=[round(r),round(g),round(b)]
+	def setPixel(self,n,c):self.led[n]=[round(c[0]),round(c[1]),round(c[2])]
 	def show(self):buffer=bytes(self.led[0])+bytes(self.led[1])+bytes(self.led[2]);self.i2c.writeto_mem(self.addr,_regLedVals,buffer)
 	def setBrightness(self,x):self.bright=x if 0<=x<=255 else 255;self.i2c.writeto_mem(self.addr,_regBright,bytes([self.bright]));sleep_ms(1)
 	def clear(self):self.i2c.writeto_mem(self.addr,_regClear,b'\x01');self.led=[[0,0,0],[0,0,0],[0,0,0]];sleep_ms(1)
