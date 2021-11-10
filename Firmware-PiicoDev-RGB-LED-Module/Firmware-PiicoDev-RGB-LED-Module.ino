@@ -1,5 +1,12 @@
-// Wire I2C Receiver
-
+/*
+ * PiicoDev 3x RGB LED Module Firmware
+ * Written by Michael Ruppe @ Core Electronics
+ * Based off the Qwiic Button Project https://github.com/sparkfun/Qwiic_Button
+ * Date: NOV 2021
+ * An I2C based LED module that allows control of 3x GlowBit (WS2812) LEDs
+ * 
+ * Feel like supporting PiicoDev? Buy a module here: https://core-electronics.com.au/catalog/product/view/sku/CE07910
+ */
 
 //#define DEBUG
 #define F_CPU 8000000
