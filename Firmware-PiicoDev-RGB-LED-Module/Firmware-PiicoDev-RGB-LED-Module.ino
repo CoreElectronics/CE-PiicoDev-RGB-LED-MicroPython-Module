@@ -20,7 +20,7 @@
 #include "nvm.h"       // EEPROM locations
 
 #define FIRMWARE_MAJOR 0x01
-#define FIRMWARE_MINOR 0x00
+#define FIRMWARE_MINOR 0x01
 
 #define DEVICE_ID 0x84
 #define DEFAULT_I2C_ADDRESS 0x08 // Works best if second digit is always zero - so address jumpers may set incrementing address always
@@ -28,8 +28,7 @@
 #define HARDWARE_ADDRESS false
 uint8_t oldAddress;
 
-// Hardware Connections
-#if defined(__AVR_ATtiny806__) || defined(__AVR_ATtiny816__)
+// Hardware Connections ATtiny8x6, ATtiny16x6
 const uint8_t powerLedPin = PIN_PC2;
 const uint16_t glowbitPin = PIN_PA1;
 
@@ -37,7 +36,6 @@ const uint8_t addressPin1 = PIN_PA7;
 const uint8_t addressPin2 = PIN_PB5;
 const uint8_t addressPin3 = PIN_PA5;
 const uint8_t addressPin4 = PIN_PB2;
-#endif
 
 const int NUMLEDS = 3;
 byte glowbits[NUMLEDS * 3];
