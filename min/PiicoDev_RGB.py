@@ -22,7 +22,7 @@ def wheel(h,s=1,v=1):
 class PiicoDev_RGB:
 	def setPixel(self,n,c):self.led[n]=[round(c[0]),round(c[1]),round(c[2])]
 	def show(self):buffer=bytes(self.led[0])+bytes(self.led[1])+bytes(self.led[2]);self.i2c.writeto_mem(self.addr,_regLedVals,buffer)
-	def setBrightness(self,x):self.bright=x if 0<=x<=255 else 255;self.i2c.writeto_mem(self.addr,_regBright,bytes([self.bright]));sleep_ms(1)
+	def setBrightness(self,x):self.bright=round(x)if 0<=x<=255 else 255;self.i2c.writeto_mem(self.addr,_regBright,bytes([self.bright]));sleep_ms(1)
 	def clear(self):self.i2c.writeto_mem(self.addr,_regClear,b'\x01');self.led=[[0,0,0],[0,0,0],[0,0,0]];sleep_ms(1)
 	def setI2Caddr(self,newAddr):x=int(newAddr);assert 8<=x<=119,'address must be >=0x08 and <=0x77';self.i2c.writeto_mem(self.addr,_regI2cAddr,bytes([x]));self.addr=x;sleep_ms(5)
 	def readFirmware(self):v=self.i2c.readfrom_mem(self.addr,_regFirmVer,2);return v[1],v[0]
