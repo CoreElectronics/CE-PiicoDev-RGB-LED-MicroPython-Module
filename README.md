@@ -36,6 +36,9 @@ Set all LEDs to the colour `c`. Automatically calls `PiicoDev_RGB.show()`.
 ### `PiicoDev_RGB.clear(c)`
 Blanks all the LEDs.
 
+### `wheel(h,s=1,v=1)`
+Pick a colour from the colour wheel. Returns a list `[R,G,B]`
+
 ### `PiicoDev_RGB.setBrightness(bright)`
 Parameter | Type | Range                  | Description
 --------- | ---- | ---------------------- |--------------------------------------------------
